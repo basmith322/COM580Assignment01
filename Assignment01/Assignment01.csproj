@@ -73,6 +73,7 @@
     <Compile Include="Attendance.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="AttendanceModel.cs" />
     <Compile Include="Database1DataSet.cs">
       <DependentUpon>Database1DataSet.xsd</DependentUpon>
     </Compile>
