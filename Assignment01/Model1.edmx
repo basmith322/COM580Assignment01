@@ -1,0 +1,439 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="Database1Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Attendance">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="attendanceStatus" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="eventID" Type="int" Nullable="false" />
+          <Property Name="studentID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Instructors">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StaffNum" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="StaffName" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="LearningEvent">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="eventType" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="eventDateTime" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="eventDuration" Type="int" Nullable="false" />
+          <Property Name="moduleID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Modules">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ModuleCode" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="ModuleName" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="ModuleLevel" Type="smallint" Nullable="false" />
+          <Property Name="InstructorId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Register">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="regDate" Type="date" Nullable="false" />
+          <Property Name="studentID" Type="int" Nullable="false" />
+          <Property Name="moduleID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Student">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="studentForname" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="studentSurname" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="studentNumber" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="studentEmail" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="studentTelNum" Type="int" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_InstructorModule">
+          <End Role="Instructors" Type="Self.Instructors" Multiplicity="1" />
+          <End Role="Modules" Type="Self.Modules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Instructors">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Modules">
+              <PropertyRef Name="InstructorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ModuleEvent">
+          <End Role="Modules" Type="Self.Modules" Multiplicity="1" />
+          <End Role="LearningEvent" Type="Self.LearningEvent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Modules">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="LearningEvent">
+              <PropertyRef Name="moduleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_moduleRegister">
+          <End Role="LearningEvent" Type="Self.LearningEvent" Multiplicity="1" />
+          <End Role="Attendance" Type="Self.Attendance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LearningEvent">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Attendance">
+              <PropertyRef Name="eventID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RegisterModule">
+          <End Role="Modules" Type="Self.Modules" Multiplicity="1" />
+          <End Role="Register" Type="Self.Register" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Modules">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Register">
+              <PropertyRef Name="moduleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RegisterStudent">
+          <End Role="Student" Type="Self.Student" Multiplicity="1" />
+          <End Role="Register" Type="Self.Register" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Student">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Register">
+              <PropertyRef Name="studentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_studentRegister">
+          <End Role="Student" Type="Self.Student" Multiplicity="1" />
+          <End Role="Attendance" Type="Self.Attendance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Student">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Attendance">
+              <PropertyRef Name="studentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Database1ModelStoreContainer">
+          <EntitySet Name="Attendance" EntityType="Self.Attendance" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Instructors" EntityType="Self.Instructors" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LearningEvent" EntityType="Self.LearningEvent" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Modules" EntityType="Self.Modules" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Register" EntityType="Self.Register" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Student" EntityType="Self.Student" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_InstructorModule" Association="Self.FK_InstructorModule">
+            <End Role="Instructors" EntitySet="Instructors" />
+            <End Role="Modules" EntitySet="Modules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ModuleEvent" Association="Self.FK_ModuleEvent">
+            <End Role="Modules" EntitySet="Modules" />
+            <End Role="LearningEvent" EntitySet="LearningEvent" />
+          </AssociationSet>
+          <AssociationSet Name="FK_moduleRegister" Association="Self.FK_moduleRegister">
+            <End Role="LearningEvent" EntitySet="LearningEvent" />
+            <End Role="Attendance" EntitySet="Attendance" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RegisterModule" Association="Self.FK_RegisterModule">
+            <End Role="Modules" EntitySet="Modules" />
+            <End Role="Register" EntitySet="Register" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RegisterStudent" Association="Self.FK_RegisterStudent">
+            <End Role="Student" EntitySet="Student" />
+            <End Role="Register" EntitySet="Register" />
+          </AssociationSet>
+          <AssociationSet Name="FK_studentRegister" Association="Self.FK_studentRegister">
+            <End Role="Student" EntitySet="Student" />
+            <End Role="Attendance" EntitySet="Attendance" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="Database1Model" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Attendance">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="attendanceStatus" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="eventID" Type="Int32" Nullable="false" />
+          <Property Name="studentID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="LearningEvent" Relationship="Self.FK_moduleRegister" FromRole="Attendance" ToRole="LearningEvent" />
+          <NavigationProperty Name="Student" Relationship="Self.FK_studentRegister" FromRole="Attendance" ToRole="Student" />
+        </EntityType>
+        <EntityType Name="Instructor">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StaffNum" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="StaffName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Modules" Relationship="Self.FK_InstructorModule" FromRole="Instructors" ToRole="Modules" />
+        </EntityType>
+        <EntityType Name="LearningEvent">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="eventType" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="eventDateTime" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="eventDuration" Type="Int32" Nullable="false" />
+          <Property Name="moduleID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Attendances" Relationship="Self.FK_moduleRegister" FromRole="LearningEvent" ToRole="Attendance" />
+          <NavigationProperty Name="Module" Relationship="Self.FK_ModuleEvent" FromRole="LearningEvent" ToRole="Modules" />
+        </EntityType>
+        <EntityType Name="Module">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ModuleCode" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ModuleName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ModuleLevel" Type="Int16" Nullable="false" />
+          <Property Name="InstructorId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Instructor" Relationship="Self.FK_InstructorModule" FromRole="Modules" ToRole="Instructors" />
+          <NavigationProperty Name="LearningEvents" Relationship="Self.FK_ModuleEvent" FromRole="Modules" ToRole="LearningEvent" />
+          <NavigationProperty Name="Registers" Relationship="Self.FK_RegisterModule" FromRole="Modules" ToRole="Register" />
+        </EntityType>
+        <EntityType Name="Register">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="regDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="studentID" Type="Int32" Nullable="false" />
+          <Property Name="moduleID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Module" Relationship="Self.FK_RegisterModule" FromRole="Register" ToRole="Modules" />
+          <NavigationProperty Name="Student" Relationship="Self.FK_RegisterStudent" FromRole="Register" ToRole="Student" />
+        </EntityType>
+        <EntityType Name="Student">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="studentForname" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="studentSurname" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="studentNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="studentEmail" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="studentTelNum" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Attendances" Relationship="Self.FK_studentRegister" FromRole="Student" ToRole="Attendance" />
+          <NavigationProperty Name="Registers" Relationship="Self.FK_RegisterStudent" FromRole="Student" ToRole="Register" />
+        </EntityType>
+        <Association Name="FK_moduleRegister">
+          <End Role="LearningEvent" Type="Self.LearningEvent" Multiplicity="1" />
+          <End Role="Attendance" Type="Self.Attendance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LearningEvent">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Attendance">
+              <PropertyRef Name="eventID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_studentRegister">
+          <End Role="Student" Type="Self.Student" Multiplicity="1" />
+          <End Role="Attendance" Type="Self.Attendance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Student">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Attendance">
+              <PropertyRef Name="studentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_InstructorModule">
+          <End Role="Instructors" Type="Self.Instructor" Multiplicity="1" />
+          <End Role="Modules" Type="Self.Module" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Instructors">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Modules">
+              <PropertyRef Name="InstructorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ModuleEvent">
+          <End Role="Modules" Type="Self.Module" Multiplicity="1" />
+          <End Role="LearningEvent" Type="Self.LearningEvent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Modules">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="LearningEvent">
+              <PropertyRef Name="moduleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RegisterModule">
+          <End Role="Modules" Type="Self.Module" Multiplicity="1" />
+          <End Role="Register" Type="Self.Register" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Modules">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Register">
+              <PropertyRef Name="moduleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RegisterStudent">
+          <End Role="Student" Type="Self.Student" Multiplicity="1" />
+          <End Role="Register" Type="Self.Register" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Student">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Register">
+              <PropertyRef Name="studentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Database1Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Attendances" EntityType="Self.Attendance" />
+          <EntitySet Name="Instructors" EntityType="Self.Instructor" />
+          <EntitySet Name="LearningEvents" EntityType="Self.LearningEvent" />
+          <EntitySet Name="Modules" EntityType="Self.Module" />
+          <EntitySet Name="Registers" EntityType="Self.Register" />
+          <EntitySet Name="Students" EntityType="Self.Student" />
+          <AssociationSet Name="FK_moduleRegister" Association="Self.FK_moduleRegister">
+            <End Role="LearningEvent" EntitySet="LearningEvents" />
+            <End Role="Attendance" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_studentRegister" Association="Self.FK_studentRegister">
+            <End Role="Student" EntitySet="Students" />
+            <End Role="Attendance" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_InstructorModule" Association="Self.FK_InstructorModule">
+            <End Role="Instructors" EntitySet="Instructors" />
+            <End Role="Modules" EntitySet="Modules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ModuleEvent" Association="Self.FK_ModuleEvent">
+            <End Role="Modules" EntitySet="Modules" />
+            <End Role="LearningEvent" EntitySet="LearningEvents" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RegisterModule" Association="Self.FK_RegisterModule">
+            <End Role="Modules" EntitySet="Modules" />
+            <End Role="Register" EntitySet="Registers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RegisterStudent" Association="Self.FK_RegisterStudent">
+            <End Role="Student" EntitySet="Students" />
+            <End Role="Register" EntitySet="Registers" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="Database1ModelStoreContainer" CdmEntityContainer="Database1Entities">
+          <EntitySetMapping Name="Attendances">
+            <EntityTypeMapping TypeName="Database1Model.Attendance">
+              <MappingFragment StoreEntitySet="Attendance">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="attendanceStatus" ColumnName="attendanceStatus" />
+                <ScalarProperty Name="eventID" ColumnName="eventID" />
+                <ScalarProperty Name="studentID" ColumnName="studentID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Instructors">
+            <EntityTypeMapping TypeName="Database1Model.Instructor">
+              <MappingFragment StoreEntitySet="Instructors">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="StaffNum" ColumnName="StaffNum" />
+                <ScalarProperty Name="StaffName" ColumnName="StaffName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LearningEvents">
+            <EntityTypeMapping TypeName="Database1Model.LearningEvent">
+              <MappingFragment StoreEntitySet="LearningEvent">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="eventType" ColumnName="eventType" />
+                <ScalarProperty Name="eventDateTime" ColumnName="eventDateTime" />
+                <ScalarProperty Name="eventDuration" ColumnName="eventDuration" />
+                <ScalarProperty Name="moduleID" ColumnName="moduleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Modules">
+            <EntityTypeMapping TypeName="Database1Model.Module">
+              <MappingFragment StoreEntitySet="Modules">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="ModuleCode" ColumnName="ModuleCode" />
+                <ScalarProperty Name="ModuleName" ColumnName="ModuleName" />
+                <ScalarProperty Name="ModuleLevel" ColumnName="ModuleLevel" />
+                <ScalarProperty Name="InstructorId" ColumnName="InstructorId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Registers">
+            <EntityTypeMapping TypeName="Database1Model.Register">
+              <MappingFragment StoreEntitySet="Register">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="regDate" ColumnName="regDate" />
+                <ScalarProperty Name="studentID" ColumnName="studentID" />
+                <ScalarProperty Name="moduleID" ColumnName="moduleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Students">
+            <EntityTypeMapping TypeName="Database1Model.Student">
+              <MappingFragment StoreEntitySet="Student">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="studentForname" ColumnName="studentForname" />
+                <ScalarProperty Name="studentSurname" ColumnName="studentSurname" />
+                <ScalarProperty Name="studentNumber" ColumnName="studentNumber" />
+                <ScalarProperty Name="studentEmail" ColumnName="studentEmail" />
+                <ScalarProperty Name="studentTelNum" ColumnName="studentTelNum" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="1c12953cb57d4e36a8ecad2edff9aa36" Name="Diagram1">
+        <EntityTypeShape EntityType="Database1Model.Attendance" Width="1.5" PointX="7.5" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.Instructor" Width="1.5" PointX="0.75" PointY="4" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.LearningEvent" Width="1.5" PointX="5.25" PointY="3.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.Module" Width="1.5" PointX="3" PointY="3.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.Register" Width="1.5" PointX="5.25" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.Student" Width="1.5" PointX="3" PointY="7.125" IsExpanded="true" />
+        <AssociationConnector Association="Database1Model.FK_moduleRegister" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.FK_studentRegister" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.FK_InstructorModule" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.FK_ModuleEvent" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.FK_RegisterModule" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.FK_RegisterStudent" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
