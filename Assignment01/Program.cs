@@ -79,7 +79,7 @@ namespace Assignment01
                         select b;
             foreach (var item in query)
             {
-                Console.WriteLine("Module Name: " + item.ModuleName + " | Module Code: " + item.ModuleCode);
+                Console.WriteLine(String.Format("Module Name: {0} | Module Code: {1}", item.ModuleName, item.ModuleCode));
             }
             ReturnToMenu();
 
@@ -147,42 +147,67 @@ namespace Assignment01
             join studentA in dbC.Students on attendanceA.studentID equals studentA.Id
             where moduleA.ModuleCode == moduleCode && studentA.studentNumber == studentNum
             orderby learningEventA.eventDateTime ascending
-            select new { moduleA.ModuleCode, learningEventA.eventType,
-                attendanceA.attendanceStatus, learningEventA.eventDateTime, 
-                studentA.studentForname, studentA.studentSurname };
+            select new
+            {
+                moduleA.ModuleCode,
+                learningEventA.eventType,
+                attendanceA.attendanceStatus,
+                learningEventA.eventDateTime,
+                studentA.studentForname,
+                studentA.studentSurname
+            };
 
             string fullname = query.FirstOrDefault().studentForname + " " + query.FirstOrDefault().studentSurname;
             foreach (var attendances in query)
-            {       
+            {
                 Console.WriteLine(String.Format("{0} {1} Attendance: {2} on {3}", fullname, attendances.eventType, attendances.attendanceStatus, attendances.eventDateTime));
-            }   
+            }
             ReturnToMenu();
         }
-
         //end AttendanceRecord function
 
         //(5)   List the names of all students who have missed two or more learning experiences given the module code.
         public void MissedClasses(AttendanceModel dbC)
         {
             string moduleCode = getModuleCode();
-            var module = dbC.Modules.Where(m => m.ModuleCode == moduleCode).FirstOrDefault();
 
-            if (module != null)
-            {
-                Console.WriteLine("Module Code: " + module.ModuleCode);
-
-                var query = from b in dbC.Students
-                            orderby b.studentForname
-                            select b;
-                foreach (var item in query)
+            var studentIds =
+                from attendanceA in dbC.Attendances
+                join learningEventA in dbC.LearningEvents on attendanceA.eventID equals learningEventA.Id
+                join moduleA in dbC.Modules on learningEventA.moduleID equals moduleA.Id
+                join studentA in dbC.Students on attendanceA.studentID equals studentA.Id
+                where moduleA.ModuleCode == moduleCode && attendanceA.attendanceStatus == "Absent"
+                group attendanceA by studentA.Id
+                into attendanceGroup
+                where attendanceGroup.Count() >= 2
+                select new
                 {
-                    Console.WriteLine("Student Name: " + item.studentForname + item.studentSurname +
-                        " |  Code: " + item.Attendances);
-                }
-            }
-            else
+                    absentCount = attendanceGroup.Count(),
+                    studentid = attendanceGroup.Key
+                };
+
+            var attendanceQuery =
+                from attendanceA in dbC.Attendances
+                join attendanceStatus in studentIds on attendanceA.Id equals attendanceStatus.studentid
+
+                select new
+                {
+                    attendanceA.attendanceStatus
+                };
+
+            var studentNames =
+                from studentA in dbC.Students
+                join absentStudent in studentIds on studentA.Id equals absentStudent.studentid
+                select new
+                {
+                    absentStudent.absentCount,
+                    studentA.studentForname, studentA.studentSurname, studentA.studentNumber
+                };
+
+            foreach (var absentStudent in studentNames)
             {
-                Console.WriteLine("There is no module with that module code");
+                string fullname = absentStudent.studentForname + " " + absentStudent.studentSurname;
+                Console.WriteLine(String.Format("{0} missed {1} events", fullname, absentStudent.absentCount));
             }
             ReturnToMenu();
         }
@@ -191,7 +216,33 @@ namespace Assignment01
         //(6)   Generate an attendance report for a selected module.
         public void GenerateReport(AttendanceModel dbC)
         {
+            string moduleCode = getModuleCode();
 
+            var query =
+            from attendanceA in dbC.Attendances
+            join learningEventA in dbC.LearningEvents on attendanceA.eventID equals learningEventA.Id
+            join moduleA in dbC.Modules on learningEventA.moduleID equals moduleA.Id
+            join studentA in dbC.Students on attendanceA.studentID equals studentA.Id
+            where moduleA.ModuleCode == moduleCode
+            orderby moduleA.ModuleCode ascending
+            select new
+            {
+                moduleA.ModuleCode,
+                learningEventA.eventType,
+                attendanceA.attendanceStatus,
+                learningEventA.eventDateTime,
+                studentA.studentForname,
+                studentA.studentSurname
+            };
+            Console.WriteLine("Module Code | Event Type | Event Date/Time | Student Name | Attendance Status");
+            foreach (var attendances in query)
+            { 
+                Console.WriteLine(String.Format("{0} | {1} | {2} | {3} {4} | {5}",
+                    attendances.ModuleCode, attendances.eventType, 
+                    attendances.eventDateTime, attendances.studentForname, 
+                    attendances.studentSurname, attendances.attendanceStatus));
+            }
+            ReturnToMenu();
         }
         //end GenerateReport function
 
@@ -217,6 +268,7 @@ namespace Assignment01
             return getInput("Please Enter a Student Number: ");
         }
 
+        //asks the user to input any key before returning to the main menu
         ConsoleKeyInfo ReturnToMenu()
         {
             Console.WriteLine("Please press any key to return to the menu");
