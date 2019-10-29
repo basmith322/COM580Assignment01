@@ -82,7 +82,7 @@ namespace Assignment01
                 Console.WriteLine("Module Name: " + item.ModuleName + " | Module Code: " + item.ModuleCode);
             }
             ReturnToMenu();
-            
+
         }
         // end ListModules function
 
@@ -138,31 +138,27 @@ namespace Assignment01
         public void AttendanceRecord(AttendanceModel dbC)
         {
             string moduleCode = getModuleCode();
-            var module = dbC.Modules.Where(l => l.ModuleCode == moduleCode).FirstOrDefault();
+            string studentNum = getStudentNum();
 
-            var studentAttendance = dbC.Students.FirstOrDefault();
-            var attendance = studentAttendance.Attendances;
+            var query =
+            from attendanceA in dbC.Attendances
+            join learningEventA in dbC.LearningEvents on attendanceA.eventID equals learningEventA.Id
+            join moduleA in dbC.Modules on learningEventA.moduleID equals moduleA.Id
+            join studentA in dbC.Students on attendanceA.studentID equals studentA.Id
+            where moduleA.ModuleCode == moduleCode && studentA.studentNumber == studentNum
+            orderby learningEventA.eventDateTime ascending
+            select new { moduleA.ModuleCode, learningEventA.eventType,
+                attendanceA.attendanceStatus, learningEventA.eventDateTime, 
+                studentA.studentForname, studentA.studentSurname };
 
-            if (module != null)
-            {
-                Console.WriteLine("Module Code: " + module.ModuleCode);
-
-                string studentNum = getStudentNum();
-                var student = dbC.Students.Where(l => l.studentNumber == studentNum);
-
-                if (student.Any())
-                {
-                    foreach (var item in student)
-                    {
-                        var fname = item.studentForname;
-                        var sname = item.studentSurname;
-                        Console.WriteLine("Student Name: " + fname + " " + sname);
-                        Console.WriteLine("Attendance Status: " + attendance);
-                    }
-                }
-            }
+            string fullname = query.FirstOrDefault().studentForname + " " + query.FirstOrDefault().studentSurname;
+            foreach (var attendances in query)
+            {       
+                Console.WriteLine(String.Format("{0} {1} Attendance: {2} on {3}", fullname, attendances.eventType, attendances.attendanceStatus, attendances.eventDateTime));
+            }   
             ReturnToMenu();
         }
+
         //end AttendanceRecord function
 
         //(5)   List the names of all students who have missed two or more learning experiences given the module code.
