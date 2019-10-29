@@ -8,7 +8,7 @@ namespace Assignment01
     public partial class AttendanceModel : DbContext
     {
         public AttendanceModel()
-            : base("name=AttendanceModel")
+            : base("name=AttendanceModel1")
         {
         }
 

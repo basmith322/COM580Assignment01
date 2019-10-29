@@ -11,7 +11,7 @@ namespace Assignment01
     {
         static void Main(string[] args)
         {
-            AttendanceModel attendanceModel = new AttendanceModel();
+            ModuleAttendanceMenu moduleAttendanceMenu = new ModuleAttendanceMenu();
             using (var db = new AttendanceModel())
             {
                 Console.WriteLine("Attendance Monitoring System " +
@@ -42,15 +42,190 @@ namespace Assignment01
                     //Switch statement to call function based on which option was entered
                     switch (option)
                     {
+                        case 1:
+                            moduleAttendanceMenu.ListModules(db);
+                            break;
+                        case 2:
+                            moduleAttendanceMenu.InstructorTakingModule(db);
+                            break;
+                        case 3:
+                            moduleAttendanceMenu.ModuleLearningEvents(db);
+                            break;
+                        case 4:
+                            moduleAttendanceMenu.AttendanceRecord(db);
+                            break;
+                        case 5:
+                            moduleAttendanceMenu.MissedClasses(db);
+                            break;
+                        case 6:
+                            moduleAttendanceMenu.GenerateReport(db);
+                            break;
                         case 7:
                             Console.WriteLine("Goodbye");
                             return;
                         default:
                             Console.WriteLine("Invalid Option!");
                             break;
-                    }
+                    }// end switch
                 }//end while loop
+            }//end using
+        }//end main
+
+        //(1)   List the module code and name of all Modules.
+        public void ListModules(AttendanceModel dbC)
+        {
+            var query = from b in dbC.Modules
+                        orderby b.ModuleName
+                        select b;
+            foreach (var item in query)
+            {
+                Console.WriteLine("Module Name: " + item.ModuleName + " | Module Code: " + item.ModuleCode);
             }
+            ReturnToMenu();
+            
+        }
+        // end ListModules function
+
+        //(2)   Given a module code, list the “Staff Number” and “Name” of the instructor taking the module.
+        public void InstructorTakingModule(AttendanceModel dbC)
+        {
+            string moduleCode = getModuleCode();
+
+            var module = dbC.Modules.Where(m => m.ModuleCode == moduleCode).FirstOrDefault();
+
+            if (module != null)
+            {
+                Console.WriteLine("Module Code: " + module.ModuleCode);
+                var instructors = module.Instructor;
+
+                Console.WriteLine("Instructor Name: " + instructors.StaffName);
+                Console.WriteLine("Instructor Number: " + instructors.StaffNum);
+            }
+            else
+            {
+                Console.WriteLine("There is no module with that module code");
+            }
+            ReturnToMenu();
+        }
+        //end InstructorTakingModule function
+
+        //(3)   Given a module code, list the “Date”, “Time” and “Type” of all the learning events associated with that module.
+        public void ModuleLearningEvents(AttendanceModel dbC)
+        {
+            string moduleCode = getModuleCode();
+
+            var module = dbC.Modules.Where(l => l.ModuleCode == moduleCode).FirstOrDefault();
+
+            if (module != null)
+            {
+                Console.WriteLine("Module Code: " + module.ModuleCode);
+                var events = module.LearningEvents;
+                foreach (var learningEvent in events)
+                {
+                    Console.WriteLine("Event Date/Time: " + learningEvent.eventDateTime);
+                    Console.WriteLine("Event Type: " + learningEvent.eventType);
+                }
+            }
+            else
+            {
+                Console.WriteLine("There is no module with that module code");
+            }
+            Console.WriteLine("---------------------------------");
+        }
+        //end ModuleLearningEvents function
+
+        //(4)   Given a module code and student number, display the attendance record (ordered by date) for that student.
+        public void AttendanceRecord(AttendanceModel dbC)
+        {
+            string moduleCode = getModuleCode();
+            var module = dbC.Modules.Where(l => l.ModuleCode == moduleCode).FirstOrDefault();
+
+            var studentAttendance = dbC.Students.FirstOrDefault();
+            var attendance = studentAttendance.Attendances;
+
+            if (module != null)
+            {
+                Console.WriteLine("Module Code: " + module.ModuleCode);
+
+                string studentNum = getStudentNum();
+                var student = dbC.Students.Where(l => l.studentNumber == studentNum);
+
+                if (student.Any())
+                {
+                    foreach (var item in student)
+                    {
+                        var fname = item.studentForname;
+                        var sname = item.studentSurname;
+                        Console.WriteLine("Student Name: " + fname + " " + sname);
+                        Console.WriteLine("Attendance Status: " + attendance);
+                    }
+                }
+            }
+            ReturnToMenu();
+        }
+        //end AttendanceRecord function
+
+        //(5)   List the names of all students who have missed two or more learning experiences given the module code.
+        public void MissedClasses(AttendanceModel dbC)
+        {
+            string moduleCode = getModuleCode();
+            var module = dbC.Modules.Where(m => m.ModuleCode == moduleCode).FirstOrDefault();
+
+            if (module != null)
+            {
+                Console.WriteLine("Module Code: " + module.ModuleCode);
+
+                var query = from b in dbC.Students
+                            orderby b.studentForname
+                            select b;
+                foreach (var item in query)
+                {
+                    Console.WriteLine("Student Name: " + item.studentForname + item.studentSurname +
+                        " |  Code: " + item.Attendances);
+                }
+            }
+            else
+            {
+                Console.WriteLine("There is no module with that module code");
+            }
+            ReturnToMenu();
+        }
+        //end MissedClasses function
+
+        //(6)   Generate an attendance report for a selected module.
+        public void GenerateReport(AttendanceModel dbC)
+        {
+
+        }
+        //end GenerateReport function
+
+        /*A collection of additional functions to help increase code re-usability and reduce redundancy*/
+
+        //get input from the user, takes a message input as a paramater
+        string getInput(string msg)
+        {
+            Console.Write(msg);
+            string input = Console.ReadLine();
+            return input;
+        }
+
+        //get the module code from the user, uses getInput function, passes through message
+        string getModuleCode()
+        {
+            return getInput("Please Enter a Module Code: ");
+        }
+
+        //get the student number from the user, uses getInput function, passes through message
+        string getStudentNum()
+        {
+            return getInput("Please Enter a Student Number: ");
+        }
+
+        ConsoleKeyInfo ReturnToMenu()
+        {
+            Console.WriteLine("Please press any key to return to the menu");
+            Console.WriteLine("---------------------------------");
+            return Console.ReadKey();
         }
     }
 }
