@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
+using ConsoleTables;
+using System.Text.RegularExpressions;
 
 namespace Assignment01
 {
@@ -14,22 +16,22 @@ namespace Assignment01
             ModuleAttendanceMenu moduleAttendanceMenu = new ModuleAttendanceMenu();
             using (var db = new AttendanceModel())
             {
-                Console.WriteLine("Attendance Monitoring System " +
-                                "\n=============================");
                 while (true)
                 {
-                    Console.WriteLine("Please select an option to continue");
-                    Console.WriteLine("(1) List all module codes & names");
-                    Console.WriteLine("(2) Enter a module code to list the staff name and and number of" +
-                        "\nthe instructor taking the module");
-                    Console.WriteLine("(3) Enter a module code to list the date and time of all learning" +
-                        "\nevents associated with that module");
-                    Console.WriteLine("(4) Enter a module code to list the student number and attendance" +
-                        "\nrecord for said student");
-                    Console.WriteLine("(5) Enter a module code and list the names of any students who have" +
-                        "\nmissed 2 or more classes for said module");
-                    Console.WriteLine("(6) Enter a module code to generate an attendance report");
-                    Console.WriteLine("(7) Exit the system");
+                    var table = new ConsoleTable("Attendance Monitoring System");
+                    table.AddRow("Please Select an option to continue");
+                    table.AddRow("(1) List all module codes & names");
+                    table.AddRow("(2) Enter a module code to list the staff name " +
+                        "and and number of the instructor taking the module");
+                    table.AddRow("(3) Enter a module code to list the date and time of all learning " +
+                        "events associated with that module");
+                    table.AddRow("(4) Enter a module code to list the student number and attendance" +
+                            "record for said student");
+                    table.AddRow("(5) Enter a module code and list the names of any students who have" +
+                            "missed 2 or more classes for said module");
+                    table.AddRow("(6) Enter a module code to generate an attendance report");
+                    table.AddRow("(7) Exit the system");
+                    table.Write();
 
                     //Handle options selection
                     int option = 0;
@@ -77,12 +79,22 @@ namespace Assignment01
             var query = from b in dbC.Modules
                         orderby b.ModuleName
                         select b;
+            //Create a new table
+            var table = new ConsoleTable("Module Code", "Module Title");
+
+            if (query.FirstOrDefault() == null)
+            {
+                Console.WriteLine("There are no modules in the system");
+                ReturnToMenu();
+            }
+
             foreach (var item in query)
             {
-                Console.WriteLine(String.Format("Module Name: {0} | Module Code: {1}", item.ModuleName, item.ModuleCode));
+                table.AddRow(item.ModuleCode, item.ModuleName);
             }
-            ReturnToMenu();
 
+            table.Write();
+            ReturnToMenu();
         }
         // end ListModules function
 
@@ -90,16 +102,12 @@ namespace Assignment01
         public void InstructorTakingModule(AttendanceModel dbC)
         {
             string moduleCode = getModuleCode();
-
             var module = dbC.Modules.Where(m => m.ModuleCode == moduleCode).FirstOrDefault();
-
+            var instructors = module.Instructor;
             if (module != null)
             {
-                Console.WriteLine("Module Code: " + module.ModuleCode);
-                var instructors = module.Instructor;
-
-                Console.WriteLine("Instructor Name: " + instructors.StaffName);
-                Console.WriteLine("Instructor Number: " + instructors.StaffNum);
+                Console.WriteLine(String.Format("Module Code {0} | Instructor Name {1} | Instructor Number {2}",
+                    module.ModuleCode, instructors.StaffName, instructors.StaffNum));
             }
             else
             {
@@ -120,17 +128,18 @@ namespace Assignment01
             {
                 Console.WriteLine("Module Code: " + module.ModuleCode);
                 var events = module.LearningEvents;
+                var table = new ConsoleTable("Event Type", "Event Date/Time");
                 foreach (var learningEvent in events)
                 {
-                    Console.WriteLine("Event Date/Time: " + learningEvent.eventDateTime);
-                    Console.WriteLine("Event Type: " + learningEvent.eventType);
+                    table.AddRow(learningEvent.eventType, learningEvent.eventDateTime);
                 }
+                table.Write();
             }
             else
             {
                 Console.WriteLine("There is no module with that module code");
             }
-            Console.WriteLine("---------------------------------");
+            ReturnToMenu();
         }
         //end ModuleLearningEvents function
 
@@ -157,7 +166,14 @@ namespace Assignment01
                 studentA.studentSurname
             };
 
+            if (query.FirstOrDefault() == null)
+            {
+                Console.WriteLine("Student Number or Module code not found");
+                ReturnToMenu();
+            }
             string fullname = query.FirstOrDefault().studentForname + " " + query.FirstOrDefault().studentSurname;
+            Console.WriteLine("The student number is incorrect, please enter a valid student number");
+
             foreach (var attendances in query)
             {
                 Console.WriteLine(String.Format("{0} {1} Attendance: {2} on {3}", fullname, attendances.eventType, attendances.attendanceStatus, attendances.eventDateTime));
@@ -201,13 +217,20 @@ namespace Assignment01
                 select new
                 {
                     absentStudent.absentCount,
-                    studentA.studentForname, studentA.studentSurname, studentA.studentNumber
+                    studentA.studentForname,
+                    studentA.studentSurname,
+                    studentA.studentNumber
                 };
 
+            if (studentIds.FirstOrDefault() == null)
+            {
+                Console.WriteLine("Module code not found");
+                ReturnToMenu();
+            }
             foreach (var absentStudent in studentNames)
             {
                 string fullname = absentStudent.studentForname + " " + absentStudent.studentSurname;
-                Console.WriteLine(String.Format("{0} missed {1} events", fullname, absentStudent.absentCount));
+                Console.WriteLine(String.Format("{0} missed {1} learning events", fullname, absentStudent.absentCount));
             }
             ReturnToMenu();
         }
@@ -234,14 +257,23 @@ namespace Assignment01
                 studentA.studentForname,
                 studentA.studentSurname
             };
-            Console.WriteLine("Module Code | Event Type | Event Date/Time | Student Name | Attendance Status");
-            foreach (var attendances in query)
-            { 
-                Console.WriteLine(String.Format("{0} | {1} | {2} | {3} {4} | {5}",
-                    attendances.ModuleCode, attendances.eventType, 
-                    attendances.eventDateTime, attendances.studentForname, 
-                    attendances.studentSurname, attendances.attendanceStatus));
+
+            if (query.FirstOrDefault() == null)
+            {
+                Console.WriteLine("Module code not found");
+                ReturnToMenu();
             }
+
+            var table = new ConsoleTable("Module Code", "Event Type", "Event Date/Time",
+                "Student Name", "Attendance Status");
+
+            foreach (var attendances in query)
+            {
+                string fullname = attendances.studentForname + " " + attendances.studentSurname;
+                table.AddRow(attendances.ModuleCode, attendances.eventType,
+                    attendances.eventDateTime, fullname, attendances.attendanceStatus);
+            }
+            table.Write();
             ReturnToMenu();
         }
         //end GenerateReport function
@@ -249,30 +281,37 @@ namespace Assignment01
         /*A collection of additional functions to help increase code re-usability and reduce redundancy*/
 
         //get input from the user, takes a message input as a paramater
-        string getInput(string msg)
+        string getInput(string msg, string regex)
         {
             Console.Write(msg);
             string input = Console.ReadLine();
+            while (!Regex.IsMatch(input, regex))
+            {
+                Console.WriteLine("Invald Input");
+                Console.Write(msg);
+                input = Console.ReadLine();
+            }
             return input;
         }
 
         //get the module code from the user, uses getInput function, passes through message
         string getModuleCode()
         {
-            return getInput("Please Enter a Module Code: ");
+            return getInput("Please Enter a Module Code: ", @"[A-Za-z][0-9]");
         }
 
         //get the student number from the user, uses getInput function, passes through message
         string getStudentNum()
         {
-            return getInput("Please Enter a Student Number: ");
+            return getInput("Please Enter a Student Number: ", @"[A-Za-z][0-9]");
         }
 
         //asks the user to input any key before returning to the main menu
         ConsoleKeyInfo ReturnToMenu()
         {
+            Console.WriteLine("-------------------------------------------");
             Console.WriteLine("Please press any key to return to the menu");
-            Console.WriteLine("---------------------------------");
+            Console.WriteLine("-------------------------------------------");
             return Console.ReadKey();
         }
     }
